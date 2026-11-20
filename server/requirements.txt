@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+gunicorn
+pandas
+numpy
+scikit-learn
+joblib
+groq
+pydantic
+python-dotenv
+requests
+sqlalchemy>=2.0
+passlib[bcrypt]>=1.7.4
+bcrypt<5
+python-jose[cryptography]>=3.3.0

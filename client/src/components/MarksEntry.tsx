@@ -1,0 +1,19 @@
+import React, { useEffect, useMemo, useState } from "react";
+import type { StudentSummary } from "../types";
+import { saveMarks } from "../services/api";
+
+export const MarksEntry: React.FC<{ classes: string[]; students: StudentSummary[]; onSaved: () => void }> = ({ classes, students, onSaved }) => {
+  const [form, setForm] = useState({ class_code: classes[0] || "", student_code: "", subject: "Mathematics", topic: "", assessment_name: "", assessment_date: new Date().toISOString().slice(0,10), marks_obtained: "", total_marks: "100", time_taken: "", questions_attempted: "", questions_correct: "" });
+  const [message, setMessage] = useState(""); const [error, setError] = useState(""); const [saving, setSaving] = useState(false);
+  useEffect(() => { if (!form.class_code && classes[0]) setForm(v => ({...v, class_code: classes[0]})); }, [classes, form.class_code]);
+  const validStudents = useMemo(() => students.filter(s => s.class_id === form.class_code), [students, form.class_code]);
+  const change = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm(v => ({...v, [e.target.name]: e.target.value}));
+  const submit = async (e: React.FormEvent) => { e.preventDefault(); setError(""); setMessage(""); if (!form.student_code) return setError("Select a student."); setSaving(true); try { await saveMarks({...form, marks_obtained:Number(form.marks_obtained), total_marks:Number(form.total_marks), time_taken:Number(form.time_taken), questions_attempted:Number(form.questions_attempted), questions_correct:Number(form.questions_correct)}); setMessage("Marks saved. Student and class analytics are now updated."); onSaved(); } catch (x) { setError(x instanceof Error ? x.message : "Could not save marks"); } finally { setSaving(false); } };
+  const fields = [["subject","Subject","text"],["topic","Topic","text"],["assessment_name","Assessment name","text"],["assessment_date","Assessment date","date"],["marks_obtained","Marks obtained","number"],["total_marks","Total marks","number"],["time_taken","Time taken (minutes)","number"],["questions_attempted","Questions attempted","number"],["questions_correct","Questions correct","number"]] as const;
+  return <div className="space-y-6"><div><h1 className="text-2xl font-bold">Faculty Marks Entry</h1><p className="text-sm text-slate-500">Records are stored securely and update performance analytics immediately.</p></div><form onSubmit={submit} className="saas-card p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <label className="text-sm font-medium">Class<select name="class_code" value={form.class_code} onChange={e=>{change(e);setForm(v=>({...v,student_code:"",class_code:e.target.value}));}} className="mt-1 w-full px-3 py-2 saas-input">{classes.map(c=><option key={c}>{c}</option>)}</select></label>
+    <label className="text-sm font-medium">Student<select name="student_code" value={form.student_code} onChange={change} required className="mt-1 w-full px-3 py-2 saas-input"><option value="">Select student</option>{validStudents.map(s=><option value={s.student_id} key={s.student_id}>{s.student_name} ({s.student_id})</option>)}</select></label>
+    {fields.map(([name,label,type])=><label className="text-sm font-medium" key={name}>{label}<input name={name} type={type} value={form[name]} onChange={change} min={type === "number" ? "0" : undefined} required className="mt-1 w-full px-3 py-2 saas-input" /></label>)}
+    <div className="lg:col-span-3 flex items-center justify-between gap-3 border-t pt-5">{error ? <span className="text-sm text-rose-700">{error}</span> : <span className="text-sm text-emerald-700">{message}</span>}<button disabled={saving} className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60">{saving ? "Saving..." : "Save marks"}</button></div>
+  </form></div>;
+};
