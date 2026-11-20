@@ -208,6 +208,18 @@ Faculty users can only load assigned classes and can save marks only for student
 
 ---
 
+## ☁️ Free persistent deployment
+
+Use Supabase PostgreSQL for durable records, Koyeb for the FastAPI backend, and Vercel for the React frontend:
+
+1. Create a Supabase project and copy its **Session Pooler** connection string from **Connect**. In Koyeb, set it as the `DATABASE_URL` secret.
+2. Create a Koyeb Web Service from this GitHub repository with `server` as the root directory, `pip install -r requirements.txt` as the build command, and `uvicorn api.main:app --host 0.0.0.0 --port $PORT` as the run command. Add `JWT_SECRET_KEY` as a generated secret. `GROQ_API_KEY` remains optional.
+3. Create a Vercel project with `client` as the root directory. Set `VITE_API_BASE_URL` to the Koyeb service URL (for example, `https://your-api.koyeb.app`) and redeploy.
+
+Local SQLite data is intentionally not committed. A fresh production database imports the bundled demo CSV; migrate local records separately if they are needed in production.
+
+---
+
 ## 📄 License
 
 Distributed under the MIT License. See `LICENSE` for details.

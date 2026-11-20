@@ -25,7 +25,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     # Allows the Render static-site hostname while retaining explicit local origins.
-    allow_origin_regex=os.getenv("CORS_ORIGIN_REGEX", r"https://[a-z0-9-]+\.onrender\.com"),
+    allow_origin_regex=os.getenv("CORS_ORIGIN_REGEX", r"https://[a-z0-9-]+\.(onrender\.com|vercel\.app)"),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
